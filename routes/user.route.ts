@@ -9,4 +9,9 @@ router.post('/register',
     userController.registerPost
 );
 
+router.post('/login', 
+    userValidate.loginPost, 
+    userController.loginPost
+);
+
 export default router;
