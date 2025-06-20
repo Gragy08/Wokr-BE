@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import AccountUser from '../models/account-user.model';
+import AccountCompany from '../models/account-company.model';
 
 export const check = async (req: Request, res: Response) => {
     try {
@@ -17,12 +18,49 @@ export const check = async (req: Request, res: Response) => {
     const decoded = jwt.verify(token, `${process.env.JWT_SECRET}`) as jwt.JwtPayload; // Giải mã token
     const { id, email } = decoded;
 
-    const existAccount = await AccountUser.findOne({
+    // Find user account
+    const existAccountUser = await AccountUser.findOne({
       _id: id,
       email: email
     });
 
-    if(!existAccount) {
+    if(existAccountUser) {
+        const infoUser = {
+        id: existAccountUser.id,
+        fullName: existAccountUser.fullName,
+        email: existAccountUser.email,
+      };
+
+      res.json({
+        code: "success",
+        message: "Token hợp lệ!",
+        infoUser: infoUser
+      });
+      return;
+    }
+
+    // Find company account
+    const existAccountCompany = await AccountCompany.findOne({
+      _id: id,
+      email: email
+    });
+
+    if(existAccountCompany) {
+        const infoCompany = {
+        id: existAccountCompany.id,
+        companyName: existAccountCompany.companyName,
+        email: existAccountCompany.email,
+      };
+
+      res.json({
+        code: "success",
+        message: "Token hợp lệ!",
+        infoUser: infoCompany
+      });
+      return;
+    }
+
+    if(!existAccountUser && !existAccountCompany) {
       res.clearCookie("token");
       res.json({
         code: "error",
@@ -30,18 +68,6 @@ export const check = async (req: Request, res: Response) => {
       });
       return;
     }
-
-    const infoUser = {
-      id: existAccount.id,
-      fullName: existAccount.fullName,
-      email: existAccount.email,
-    };
-
-    res.json({
-      code: "success",
-      message: "Token hợp lệ!",
-      infoUser: infoUser
-    });
   } catch (error) {
     res.clearCookie("token");
     res.json({
