@@ -55,7 +55,7 @@ export const check = async (req: Request, res: Response) => {
       res.json({
         code: "success",
         message: "Token hợp lệ!",
-        infoUser: infoCompany
+        infoCompany: infoCompany
       });
       return;
     }
